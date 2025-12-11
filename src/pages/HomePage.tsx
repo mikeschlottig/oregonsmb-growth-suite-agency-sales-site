@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState } from 'react';
 import { Search, UserPlus, Zap, BrainCircuit } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -11,10 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PricingCard } from '@/components/PricingCard';
-import { LeadsWidget, SeoAuditWidget, WidgetSkeleton } from '@/components/DashboardWidgets';
+import { LeadsWidget, SeoAuditWidget, WidgetSkeleton, KeywordTrackerWidget, AiReceptionistWidget } from '@/components/DashboardWidgets';
 import { usePlanStore, Plan } from '@/stores/usePlanStore';
-const KeywordTrackerWidget = lazy(() => import('@/components/DashboardWidgets').then(module => ({ default: module.KeywordTrackerWidget })));
-const AiReceptionistWidget = lazy(() => import('@/components/DashboardWidgets').then(module => ({ default: module.AiReceptionistWidget })));
 type Page = 'marketing' | 'dashboard';
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -23,7 +21,7 @@ const pageVariants = {
 };
 const pageTransition = {
   duration: 0.5,
-  ease: 'easeInOut',
+  ease: [0.42, 0, 0.58, 1],
 };
 const fetchApi = async (endpoint: string) => {
   // Simulate network delay
@@ -172,17 +170,13 @@ export function HomePage() {
               <div className="lg:col-span-2 space-y-8">
                 {isLoadingLeads ? <WidgetSkeleton /> : <LeadsWidget plan={plan} leads={leads} onUpgrade={handleUpgrade} />}
                 {plan !== 'starter' && (
-                  <Suspense fallback={<WidgetSkeleton />}>
-                    {isLoadingKeywords ? <WidgetSkeleton /> : <KeywordTrackerWidget keywords={keywords} />}
-                  </Suspense>
+                  isLoadingKeywords ? <WidgetSkeleton /> : <KeywordTrackerWidget keywords={keywords} />
                 )}
               </div>
               <div className="space-y-8">
                 {isLoadingSeo ? <WidgetSkeleton /> : <SeoAuditWidget plan={plan} seoData={seoData} onUpgrade={handleUpgrade} />}
                 {plan === 'scale' && (
-                  <Suspense fallback={<WidgetSkeleton />}>
-                    {isLoadingAiLogs ? <WidgetSkeleton /> : <AiReceptionistWidget aiLogs={aiLogs} />}
-                  </Suspense>
+                  isLoadingAiLogs ? <WidgetSkeleton /> : <AiReceptionistWidget aiLogs={aiLogs} />
                 )}
               </div>
             </div>
