@@ -2,7 +2,7 @@
 
 A high-end, sales-focused, multi-tabbed marketing and dashboard website for the OregonSMB Growth Suite. This single-page application (SPA) features a premium home page with multi-tab navigation (Find a Pro, For Business, Pricing) and a demo dashboard that showcases product value through plan-gated widgets. Built with obsessive attention to visual excellence, smooth interactions, and responsive design.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/mikeschlottig/oregonsmb-growth-suite-agency-sales-site)
 
 ## Overview
 
@@ -141,7 +141,7 @@ Deploy to Cloudflare Workers for global edge delivery with zero-config SPA hosti
 
 5. **Custom Domain**: In the Cloudflare dashboard, add a custom domain under Workers > Your Project > Triggers.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/mikeschlottig/oregonsmb-growth-suite-agency-sales-site)
 
 ### Post-Deployment
 
