@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Building, Menu, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { usePlanStore } from '@/stores/usePlanStore';
 type SiteHeaderProps = {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -10,6 +12,7 @@ type SiteHeaderProps = {
 export function SiteHeader({ activeTab, onTabChange }: SiteHeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const plan = usePlanStore((state) => state.plan);
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -29,11 +32,18 @@ export function SiteHeader({ activeTab, onTabChange }: SiteHeaderProps) {
         setIsMobileMenuOpen(false);
       }}
       className={cn(
-        'text-base font-medium transition-colors hover:text-primary',
+        'text-base font-medium transition-colors hover:text-primary relative',
         activeTab === id ? 'text-primary' : 'text-muted-foreground'
       )}
+      aria-current={activeTab === id ? 'page' : undefined}
     >
       {label}
+      {activeTab === id && (
+        <motion.div
+          className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary"
+          layoutId="underline"
+        />
+      )}
     </button>
   );
   return (
@@ -63,13 +73,13 @@ export function SiteHeader({ activeTab, onTabChange }: SiteHeaderProps) {
               className="hidden sm:inline-flex"
               onClick={() => onTabChange('dashboard')}
             >
-              Sign In
+              {plan ? 'My Dashboard' : 'Sign In'}
             </Button>
             <Button
               className="btn-gradient hidden sm:inline-flex"
-              onClick={() => onTabChange('dashboard')}
+              onClick={() => onTabChange('pricing')}
             >
-              Dashboard
+              Get Started
             </Button>
             <div className="md:hidden">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -79,15 +89,18 @@ export function SiteHeader({ activeTab, onTabChange }: SiteHeaderProps) {
                     <span className="sr-only">Open menu</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-full max-w-xs">
-                  <div className="flex flex-col h-full p-6">
+                <SheetContent side="right" className="w-full max-w-xs p-0">
+                  <motion.div
+                    initial={{ x: '100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '100%' }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="flex flex-col h-full p-6 bg-background"
+                  >
                     <div className="flex items-center justify-between mb-8">
                        <div
                           className="flex items-center gap-2 cursor-pointer"
-                          onClick={() => {
-                            onTabChange('home');
-                            setIsMobileMenuOpen(false);
-                          }}
+                          onClick={() => { onTabChange('home'); setIsMobileMenuOpen(false); }}
                         >
                           <Building className="h-7 w-7 text-primary" />
                           <span className="font-display text-xl font-bold">OregonSMB</span>
@@ -96,7 +109,7 @@ export function SiteHeader({ activeTab, onTabChange }: SiteHeaderProps) {
                           <X className="h-6 w-6" />
                         </Button>
                     </div>
-                    <nav className="flex flex-col space-y-6">
+                    <nav className="flex flex-col space-y-6 text-lg">
                       {navLinks.map((link) => (
                         <NavLink key={link.id} {...link} />
                       ))}
@@ -105,24 +118,18 @@ export function SiteHeader({ activeTab, onTabChange }: SiteHeaderProps) {
                        <Button
                           variant="outline"
                           className="w-full"
-                          onClick={() => {
-                            onTabChange('dashboard');
-                            setIsMobileMenuOpen(false);
-                          }}
+                          onClick={() => { onTabChange('dashboard'); setIsMobileMenuOpen(false); }}
                         >
-                          Sign In
+                          {plan ? 'My Dashboard' : 'Sign In'}
                         </Button>
                         <Button
                           className="btn-gradient w-full"
-                          onClick={() => {
-                            onTabChange('dashboard');
-                            setIsMobileMenuOpen(false);
-                          }}
+                          onClick={() => { onTabChange('pricing'); setIsMobileMenuOpen(false); }}
                         >
-                          Dashboard
+                          Get Started
                         </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 </SheetContent>
               </Sheet>
             </div>
