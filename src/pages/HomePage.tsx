@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { Search, UserPlus, Zap, BrainCircuit } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -11,14 +11,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PricingCard } from '@/components/PricingCard';
-import {
-  LeadsWidget,
-  SeoAuditWidget,
-  KeywordTrackerWidget,
-  AiReceptionistWidget,
-  WidgetSkeleton,
-} from '@/components/DashboardWidgets';
+import { LeadsWidget, SeoAuditWidget, WidgetSkeleton } from '@/components/DashboardWidgets';
 import { usePlanStore, Plan } from '@/stores/usePlanStore';
+const KeywordTrackerWidget = lazy(() => import('@/components/DashboardWidgets').then(module => ({ default: module.KeywordTrackerWidget })));
+const AiReceptionistWidget = lazy(() => import('@/components/DashboardWidgets').then(module => ({ default: module.AiReceptionistWidget })));
 type Page = 'marketing' | 'dashboard';
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -26,11 +22,12 @@ const pageVariants = {
   out: { opacity: 0, y: -20 },
 };
 const pageTransition = {
-  type: 'tween',
-  ease: [0.25, 0.1, 0.25, 1],
   duration: 0.5,
+  ease: 'easeInOut',
 };
 const fetchApi = async (endpoint: string) => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 500));
   const res = await fetch(endpoint);
   if (!res.ok) throw new Error('Network response was not ok');
   const json = await res.json();
@@ -84,9 +81,9 @@ export function HomePage() {
                     <div className="w-full max-w-lg lg:max-w-md">
                       <div className="relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <Input type="text" placeholder="What service do you need?" className="w-full pl-12 pr-4 py-3 h-14 text-lg rounded-xl" />
+                        <Input type="text" placeholder="What service do you need?" className="w-full pl-12 pr-4 py-3 h-14 text-lg rounded-xl focus-visible:ring-primary" aria-label="Service search input" />
                       </div>
-                      <Button size="lg" className="mt-3 w-full h-14 text-lg btn-gradient">Search</Button>
+                      <Button size="lg" className="mt-3 w-full h-14 text-lg btn-gradient focus-visible:ring-primary" aria-label="Search for services">Search</Button>
                     </div>
                   </motion.div>
                 </div>
@@ -94,7 +91,7 @@ export function HomePage() {
             </div>
           </div>
           <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-            <img className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full" src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2832&auto=format&fit=crop" alt="Business professionals" />
+            <img className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full" src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2832&auto=format&fit=crop" alt="Business professionals collaborating" />
           </div>
         </div>
       </TabsContent>
@@ -121,7 +118,7 @@ export function HomePage() {
               ))}
             </div>
             <div className="mt-12">
-              <Button size="lg" className="text-xl px-8 py-6 btn-gradient" onClick={() => setActiveMarketingTab('pricing')}>
+              <Button size="lg" className="text-xl px-8 py-6 btn-gradient focus-visible:ring-primary h-auto" onClick={() => setActiveMarketingTab('pricing')}>
                 See Plans & Pricing
               </Button>
             </div>
@@ -162,7 +159,7 @@ export function HomePage() {
               <div className="flex items-center space-x-2">
                 <span className="text-sm font-medium text-muted-foreground">Current Plan:</span>
                 <Select value={plan} onValueChange={(value: Plan) => handleSetPlan(value)}>
-                  <SelectTrigger className="w-[180px] bg-background"><SelectValue placeholder="Change Plan" /></SelectTrigger>
+                  <SelectTrigger className="w-[180px] bg-background h-11 focus:ring-primary" aria-label="Change subscription plan"><SelectValue placeholder="Change Plan" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="starter">Starter</SelectItem>
                     <SelectItem value="growth">Growth</SelectItem>
@@ -173,9 +170,7 @@ export function HomePage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
-                <Suspense fallback={<WidgetSkeleton />}>
-                  {isLoadingLeads ? <WidgetSkeleton /> : <LeadsWidget plan={plan} leads={leads} onUpgrade={handleUpgrade} />}
-                </Suspense>
+                {isLoadingLeads ? <WidgetSkeleton /> : <LeadsWidget plan={plan} leads={leads} onUpgrade={handleUpgrade} />}
                 {plan !== 'starter' && (
                   <Suspense fallback={<WidgetSkeleton />}>
                     {isLoadingKeywords ? <WidgetSkeleton /> : <KeywordTrackerWidget keywords={keywords} />}
@@ -183,9 +178,7 @@ export function HomePage() {
                 )}
               </div>
               <div className="space-y-8">
-                <Suspense fallback={<WidgetSkeleton />}>
-                  {isLoadingSeo ? <WidgetSkeleton /> : <SeoAuditWidget plan={plan} seoData={seoData} onUpgrade={handleUpgrade} />}
-                </Suspense>
+                {isLoadingSeo ? <WidgetSkeleton /> : <SeoAuditWidget plan={plan} seoData={seoData} onUpgrade={handleUpgrade} />}
                 {plan === 'scale' && (
                   <Suspense fallback={<WidgetSkeleton />}>
                     {isLoadingAiLogs ? <WidgetSkeleton /> : <AiReceptionistWidget aiLogs={aiLogs} />}
